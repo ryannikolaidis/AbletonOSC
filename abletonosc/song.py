@@ -76,6 +76,7 @@ class SongHandler(AbletonOSCHandler):
             "can_undo",
             "is_playing",
             "song_length",
+            "file_path",
         ]
 
         for prop in properties_r + properties_rw:

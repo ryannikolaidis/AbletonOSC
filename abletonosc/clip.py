@@ -108,6 +108,18 @@ class ClipHandler(AbletonOSCHandler):
             self.osc_server.add_handler("/live/clip/set/%s" % prop,
                                         create_clip_callback(self._set_property, prop))
 
+        def clip_get_details(clip, params: Optional[Tuple] = ()):
+            return tuple([
+                clip.name,
+                clip.length,
+                clip.signature_denominator,
+                clip.signature_numerator,
+                clip.start_time,
+                clip.end_time,
+                clip.loop_start,
+                clip.loop_end
+            ])
+
         def clip_get_notes(clip, params: Tuple[Any] = ()):
             if len(params) == 4:
                 pitch_start, pitch_span, time_start, time_span = params
@@ -142,6 +154,7 @@ class ClipHandler(AbletonOSCHandler):
                 raise ValueError("Invalid number of arguments for /clip/remove/notes. Either 0 or 4 arguments must be passed.")
             clip.remove_notes_extended(pitch_start, pitch_span, time_start, time_span)
 
+        self.osc_server.add_handler("/live/clip/get/details", create_clip_callback(clip_get_details))
         self.osc_server.add_handler("/live/clip/get/notes", create_clip_callback(clip_get_notes))
         self.osc_server.add_handler("/live/clip/add/notes", create_clip_callback(clip_add_notes))
         self.osc_server.add_handler("/live/clip/remove/notes", create_clip_callback(clip_remove_notes))
