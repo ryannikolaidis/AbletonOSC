@@ -28,6 +28,56 @@ class ViewHandler(AbletonOSCHandler):
                     self.logger.info("obj.%s = %r" % (attr, getattr(self.song.view.detail_clip, attr)))
                 except:
                     pass
+
+        def get_detail_clip_full(params: Optional[Tuple] = ()):
+            """
+            Get details and notes of a clip given the track and clip index.
+            """
+            clip = self.song.view.detail_clip
+            self.logger.info("get_detail_clip_full", clip)
+            
+            details = [
+                clip.name,
+                clip.length,
+                clip.signature_numerator,
+                clip.signature_denominator,
+                clip.start_marker,
+                clip.end_marker,
+                clip.loop_start,
+                clip.loop_end
+            ]
+            notes = clip.get_notes_extended(0, 127, -8192, 16384)
+            all_note_attributes = []
+            for note in notes:
+                all_note_attributes += [note.pitch, note.start_time, note.duration, note.velocity, note.mute]
+            return tuple(details + all_note_attributes)
+
+        def get_full_selected_clip(params):
+            """
+            Get track index, clip index, details and notes of the selected clip.
+            """
+            track_index = get_selected_track()[0]
+            clip_index = get_selected_scene()[0]
+            clip = self.song.tracks[track_index].clip_slots[clip_index].clip
+            self.logger.info("get_selected_clip_full", track_index, clip_index, clip)
+            if clip is None:
+                return tuple([track_index])
+            details = [
+                clip.name,
+                clip.length,
+                clip.signature_numerator,
+                clip.signature_denominator,
+                clip.start_marker,
+                clip.end_marker,
+                clip.loop_start,
+                clip.loop_end
+            ]
+            notes = clip.get_notes_extended(0, 127, -8192, 16384)
+            all_note_attributes = []
+            for note in notes:
+                all_note_attributes += [note.pitch, note.start_time, note.duration, note.velocity, note.mute]
+            return tuple([track_index, clip_index] + details + all_note_attributes)
+
         def detail_clip_get_details(params: Optional[Tuple] = ()):
 
             return tuple([
@@ -105,6 +155,7 @@ class ViewHandler(AbletonOSCHandler):
         self.osc_server.add_handler("/live/view/get/selected_scene", get_selected_scene)
         self.osc_server.add_handler("/live/view/get/selected_track", get_selected_track)
         self.osc_server.add_handler("/live/view/get/selected_clip", get_selected_clip)
+        self.osc_server.add_handler("/live/view/get/full/selected_clip", get_full_selected_clip)
         self.osc_server.add_handler("/live/view/get/selected_device", get_selected_device)
         self.osc_server.add_handler("/live/view/set/selected_scene", set_selected_scene)
         self.osc_server.add_handler("/live/view/set/selected_track", set_selected_track)

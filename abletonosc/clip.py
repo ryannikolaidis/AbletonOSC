@@ -91,6 +91,8 @@ class ClipHandler(AbletonOSCHandler):
             "warping",
             "start_marker",
             "end_marker",
+            "signature_denominator",
+            "signature_numerator",
         ]
 
         for method in methods:
@@ -112,10 +114,10 @@ class ClipHandler(AbletonOSCHandler):
             return tuple([
                 clip.name,
                 clip.length,
-                clip.signature_denominator,
                 clip.signature_numerator,
-                clip.start_time,
-                clip.end_time,
+                clip.signature_denominator,
+                clip.start_marker,
+                clip.end_marker,
                 clip.loop_start,
                 clip.loop_end
             ])

@@ -156,6 +156,41 @@ class SongHandler(AbletonOSCHandler):
         self.osc_server.add_handler("/live/song/get/track_data", song_get_track_data)
 
 
+        def song_get_full_clip_data(params):
+            """
+            Get details and notes of a clip given the track and clip index.
+            """
+            track_index, clip_index = params
+            self.logger.info("Getting full clip data for track %d, clip %d" % (track_index, clip_index))
+            track = self.song.tracks[track_index]
+            clip = track.clip_slots[clip_index].clip
+            details = [
+                clip.name,
+                clip.length,
+                clip.signature_numerator,
+                clip.signature_denominator,
+                clip.start_marker,
+                clip.end_marker,
+                clip.loop_start,
+                clip.loop_end
+            ]
+            notes = clip.get_notes_extended(0, 127, -8192, 16384)
+            all_note_attributes = []
+            for note in notes:
+                all_note_attributes += [note.pitch, note.start_time, note.duration, note.velocity, note.mute]
+            return tuple(details + all_note_attributes)
+        self.osc_server.add_handler("/live/song/get/clip/full", song_get_full_clip_data)
+
+        def song_get_track_empty_clip_slot_indices(params):
+            """
+            Get the indices of empty clip slots in a track.
+            """
+            track_index = params[0]
+            track = self.song.tracks[track_index]
+            empty_clip_slot_indices = [index for index, clip_slot in enumerate(track.clip_slots) if clip_slot.clip is None]
+            return tuple(empty_clip_slot_indices)
+        self.osc_server.add_handler("/live/song/get/track/empty_clip_slots", song_get_track_empty_clip_slot_indices)
+
         def song_export_structure(params):
             tracks = []
             for track_index, track in enumerate(self.song.tracks):
